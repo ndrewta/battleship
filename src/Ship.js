@@ -5,9 +5,9 @@ export default class Ship {
     this.sunk = false;
   }
 
-  hit(target) {
+  hit() {
     // Hit target
-    target.hits += 1;
+    this.hits += 1;
   }
 
   isSunk() {

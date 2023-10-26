@@ -1,20 +1,19 @@
-import Ship from "../ship";
+import Ship from "../Ship";
 
 // Init ships
-const ship1 = new Ship();
-const ship2 = new Ship();
+const ship = new Ship();
 
 test("Hit target", () => {
   // Hit ships
-  ship1.hit(ship2);
-  expect(ship2.hits).toBe(1);
+  ship.hit();
+  expect(ship.hits).toBe(1);
 });
 
 test("Check if sunk", () => {
   // Hit ship 4 times then check if sunk
   for (let i = 0; i < 4; i++) {
-    ship1.hit(ship2);
+    ship.hit();
   }
 
-  expect(ship2.isSunk()).toBe(true);
+  expect(ship.isSunk()).toBe(true);
 });
