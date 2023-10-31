@@ -1,17 +1,15 @@
 export default class GameBoard {
   constructor(owner) {
     this.owner = owner;
-    this.length = 10;
-    this.width = 10;
     this.grid = {};
     this.initGrid(this.length, this.width);
   }
 
   initGrid() {
     // Create a 10x10 grid
-    for (let x = 1; x <= this.length; x++) {
+    for (let x = 1; x <= 10; x++) {
       this.grid[x] = {};
-      for (let y = 1; y <= this.width; y++) {
+      for (let y = 1; y <= 10; y++) {
         this.grid[x][y] = {};
       }
     }
@@ -59,8 +57,8 @@ export default class GameBoard {
     const shipSet = new Set();
 
     // Store all ships into set
-    for (let x = 1; x <= this.length; x++) {
-      for (let y = 1; y <= this.width; y++) {
+    for (let x = 1; x <= 10; x++) {
+      for (let y = 1; y <= 10; y++) {
         if (this.grid[x][y].hasOwnProperty("length")) {
           shipSet.add(this.grid[x][y]);
         }

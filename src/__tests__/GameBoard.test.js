@@ -1,5 +1,5 @@
 import GameBoard from "../GameBoard.js";
-import Ship from "../Ship";
+import Ship from "../Ship.js";
 
 // Init gameboard
 let ship;
