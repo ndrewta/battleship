@@ -1,0 +1,39 @@
+.board {
+  font-size: 36px;
+  border: solid 1px;
+  width: 500px;
+  height: 500px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+
+#top-label {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-column-start: 2;
+  text-align: center;
+  height: 50px;
+  margin-top: 20px;
+}
+
+#left-label {
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  grid-row-start: 2;
+  text-align: center;
+}
+
+.content {
+  margin-bottom: 25px;
+  width: 575px;
+  display: grid;
+  grid-template-columns: 75px 500px;
+  grid-template-rows: 75px 500px;
+}
+
+.squares {
+  border: solid 1px;
+}

@@ -5,7 +5,10 @@ module.exports = {
   mode: "development",
   entry: {
     index: "./src/index.js",
-    ship: "./src/ship.js",
+    ship: "./src/Ship.js",
+    gameboard: "./src/GameBoard.js",
+    player: "./src/Player.js",
+    layout: "./src/layout.js",
   },
   devtool: "inline-source-map",
   plugins: [
