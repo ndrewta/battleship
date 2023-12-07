@@ -8,57 +8,50 @@ let gb;
 beforeEach(() => {
   // Init ship
   ship = new Ship();
-  gb = new GameBoard();
+  gb = new GameBoard("test");
 });
 afterEach(() => {
   ship = null;
   gb = null;
 });
 
-test("place ship upwards", () => {
-  gb.placeShip(ship, 4, 5);
-  expect(gb.grid[4][7]).toBe(ship);
-});
-
 test("place ship downwards", () => {
-  gb.placeShip(ship, 5, 4);
-  expect(gb.grid[5][2]).toBe(ship);
-});
-
-test("place ship leftwards", () => {
-  gb.placeShip(ship, 4, 5);
-  expect(gb.grid[2][5]).toBe(ship);
+  gb.placeShipDown(ship, 7, 5);
+  expect(gb.grid[7][2]).toBe(ship);
 });
 
 test("place ship rightwards", () => {
-  gb.placeShip(ship, 5, 4);
-  expect(gb.grid[7][4]).toBe(ship);
+  gb.placeShipRight(ship, 3, 4);
+  expect(gb.grid[6][4]).toBe(ship);
 });
 
 test("receiveAttack coord hit", () => {
-  gb.placeShip(ship, 4, 5);
-  gb.receiveAttack(4, 5);
-  expect(gb.grid[4][5].status).toMatch("hit");
+  gb.placeShipDown(ship, 7, 5);
+  gb.receiveAttack({ owner: "test", x: 7, y: 5 });
+  expect(gb.grid[7][5].status).toMatch("hit");
 });
 
 test("receiveAttack ship damage", () => {
-  gb.placeShip(ship, 4, 5);
-  gb.receiveAttack(4, 5);
-  expect(gb.grid[4][5].hits).toBe(1);
+  gb.placeShipDown(ship, 7, 5);
+  gb.receiveAttack({ owner: "test", x: 7, y: 5 });
+  expect(ship.hits).toBe(1);
 });
 
 test("receiveAttack miss", () => {
-  gb.receiveAttack(1, 1);
+  gb.receiveAttack({ owner: "bot", x: 1, y: 1 });
   expect(gb.grid[1][1].status).toMatch("miss");
 });
 
 test("ships still not sunk", () => {
-  gb.placeShip(ship, 4, 5);
+  gb.placeShipRight(ship, 2, 4);
   expect(gb.checkPlayerShips()).toBe(false);
 });
 
 test("ships all sunk", () => {
-  gb.placeShip(ship, 5, 4);
-  ship.sunk = true;
+  gb.placeShipDown(ship, 5, 4);
+
+  for (let y = 4; y >= 1; y--) {
+    gb.receiveAttack({ owner: "test", x: 5, y });
+  }
   expect(gb.checkPlayerShips()).toBe(true);
 });

@@ -9,6 +9,7 @@ module.exports = {
     gameboard: "./src/GameBoard.js",
     player: "./src/Player.js",
     layout: "./src/layout.js",
+    pubsub: "./src/pubSub.js",
   },
   devtool: "inline-source-map",
   plugins: [

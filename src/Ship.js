@@ -6,6 +6,7 @@ export default class Ship {
   }
 
   hit() {
+    // Check if hits > length
     // Hit target
     this.hits += 1;
   }
