@@ -8,7 +8,7 @@ let gb;
 beforeEach(() => {
   // Init ship
   ship = new Ship();
-  gb = new GameBoard("test");
+  gb = new GameBoard("test", "top");
 });
 afterEach(() => {
   ship = null;
@@ -27,18 +27,18 @@ test("place ship rightwards", () => {
 
 test("receiveAttack coord hit", () => {
   gb.placeShipDown(ship, 7, 5);
-  gb.receiveAttack({ owner: "test", x: 7, y: 5 });
-  expect(gb.grid[7][5].status).toMatch("hit");
+  gb.receiveAttack({ owner: "top", x: 7, y: 4 });
+  expect(gb.grid[7][4].status).toMatch("hit");
 });
 
 test("receiveAttack ship damage", () => {
   gb.placeShipDown(ship, 7, 5);
-  gb.receiveAttack({ owner: "test", x: 7, y: 5 });
+  gb.receiveAttack({ owner: "top", x: 7, y: 5 });
   expect(ship.hits).toBe(1);
 });
 
 test("receiveAttack miss", () => {
-  gb.receiveAttack({ owner: "bot", x: 1, y: 1 });
+  gb.receiveAttack({ owner: "top", x: 1, y: 1 });
   expect(gb.grid[1][1].status).toMatch("miss");
 });
 
@@ -51,7 +51,7 @@ test("ships all sunk", () => {
   gb.placeShipDown(ship, 5, 4);
 
   for (let y = 4; y >= 1; y--) {
-    gb.receiveAttack({ owner: "test", x: 5, y });
+    gb.receiveAttack({ owner: "top", x: 5, y });
   }
   expect(gb.checkPlayerShips()).toBe(true);
 });
