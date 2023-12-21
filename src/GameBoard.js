@@ -1,12 +1,29 @@
 import ps from "./pubSub";
 
 export default class GameBoard {
-  constructor(owner) {
+  constructor(owner, boardPosition) {
     this.owner = owner;
+    this.boardPosition = boardPosition;
     this.grid = {};
     this.initGrid(this.length, this.width);
     this.sunkShips = 0;
     this.shipSet = new Set();
+    this.totalShips = 0;
+    ps.subscribe("attack-grid", (e) => this.receiveAttack(e));
+    ps.subscribe("reset-values", () => this.resetValues());
+  }
+
+  resetValues() {
+    // Reset ship set
+    this.shipSet = null;
+    this.shipSet = new Set();
+
+    // Reset grid
+    this.grid = {};
+    this.initGrid(this.length, this.width);
+
+    // Reset variables
+    this.sunkShips = 0;
     this.totalShips = 0;
   }
 
@@ -42,13 +59,15 @@ export default class GameBoard {
     const { x } = coord;
     const { y } = coord;
     const { owner } = coord;
+    if (owner !== this.boardPosition) {
+      return;
+    }
     // Check if a coordinate hit or miss a ship
     if (this.grid[x][y].status == "hit" || this.grid[x][y].status == "miss") {
       return;
     }
     if (Object.values(this.grid[x][y]).length !== 0) {
       // Check if already hit or miss then do nothing
-
       // ship.hits += 1;
       this.grid[x][y].hit();
       this.grid[x][y].isSunk();
@@ -58,13 +77,13 @@ export default class GameBoard {
       this.grid[x][y].status = "miss";
     }
     // Update grid
+    // Check player ships status
     this.checkPlayerShips();
     this.updateGrid(owner);
   }
 
   checkPlayerShips() {
     // Check if ships sunk then push to array
-
     this.shipSet.forEach((ship) => {
       if (ship.sunk == true && ship.length == ship.hits) {
         this.sunkShips += 1;
@@ -74,14 +93,16 @@ export default class GameBoard {
 
     // Check if number of sunk ships is equal to number of all ships on board
     if (this.sunkShips == this.totalShips) {
-      console.log(`${this.owner} lost all their ships!`);
-
+      console.log(`${this.owner.name} lost!`);
+      ps.publish("game-over");
       return true;
     }
     return false;
   }
 
   updateGrid(elem) {
+    // console.log(this.owner, this.grid);
+
     // Publish updated grid values
     const obj = { owner: this.owner, grid: this.grid, elem };
     ps.publish("update-board", obj);
