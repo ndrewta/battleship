@@ -1,7 +1,7 @@
 import Ship from "../Ship";
 
 // Init ships
-const ship = new Ship();
+const ship = new Ship(4);
 
 test("Hit target", () => {
   // Hit ships
@@ -11,7 +11,7 @@ test("Hit target", () => {
 
 test("Check if sunk", () => {
   // Hit ship 4 times then check if sunk
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < ship.length; i++) {
     ship.hit();
   }
 

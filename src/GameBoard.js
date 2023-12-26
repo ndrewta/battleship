@@ -38,6 +38,10 @@ export default class GameBoard {
   }
 
   placeShipDown(ship, x, y) {
+    if (y > 10) {
+      console.log("placeshipdown error. y > 10");
+      return;
+    }
     // Place ship downwards
     for (let i = 0; i < ship.length; i++) {
       this.grid[x][y - i] = ship;
@@ -47,6 +51,10 @@ export default class GameBoard {
   }
 
   placeShipRight(ship, x, y) {
+    if (x > 10) {
+      console.log("placeshipright error. x > 10");
+      return;
+    }
     // Place ship rightwards
     for (let i = 0; i < ship.length; i++) {
       this.grid[x + i][y] = ship;
@@ -94,7 +102,7 @@ export default class GameBoard {
     // Check if number of sunk ships is equal to number of all ships on board
     if (this.sunkShips == this.totalShips) {
       console.log(`${this.owner.name} lost!`);
-      ps.publish("game-over");
+      ps.publish("game-over", this.boardPosition);
       return true;
     }
     return false;

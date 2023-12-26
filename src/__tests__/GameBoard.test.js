@@ -7,7 +7,7 @@ let gb;
 
 beforeEach(() => {
   // Init ship
-  ship = new Ship();
+  ship = new Ship(4);
   gb = new GameBoard("test", "top");
 });
 afterEach(() => {
