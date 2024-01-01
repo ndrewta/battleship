@@ -56,16 +56,16 @@ function newGame() {
   ps.publish("reset-values");
 
   // Place player ships
-  playerBoard.placeShipDown(playerShip1, ...generateCoords());
-  playerBoard.placeShipDown(playerShip2, ...generateCoords());
-  playerBoard.placeShipRight(playerShip3, ...generateCoords());
-  playerBoard.placeShipRight(playerShip4, ...generateCoords());
+  playerBoard.placeShipDown(playerShip1);
+  playerBoard.placeShipDown(playerShip2);
+  playerBoard.placeShipRight(playerShip3);
+  playerBoard.placeShipRight(playerShip4);
 
   // Place CPU ships
-  CPUBoard.placeShipDown(CPUShip1, ...generateCoords());
-  CPUBoard.placeShipDown(CPUShip2, ...generateCoords());
-  CPUBoard.placeShipRight(CPUShip3, ...generateCoords());
-  CPUBoard.placeShipRight(CPUShip4, ...generateCoords());
+  CPUBoard.placeShipDown(CPUShip1);
+  CPUBoard.placeShipDown(CPUShip2);
+  CPUBoard.placeShipRight(CPUShip3);
+  CPUBoard.placeShipRight(CPUShip4);
 
   // Update both grids
 
@@ -73,23 +73,4 @@ function newGame() {
   CPUBoard.updateGrid("top");
 }
 
-function generateCoords() {
-  let numX = Math.floor(Math.random() * 10) + 1;
-  let numY = Math.floor(Math.random() * 10) + 1;
-  let absDifference = Math.abs(numX - numY);
-  let coordinates = [numX, numY];
-
-  while (absDifference > 4 || absDifference == 0) {
-    numX = Math.floor(Math.random() * 10) + 1;
-    numY = Math.floor(Math.random() * 10) + 1;
-    absDifference = Math.abs(numX - numY);
-  }
-
-  return coordinates;
-}
-
 ps.subscribe("new-game", newGame);
-
-const testBtn = document.getElementById("test");
-testBtn.style.pointerEvents = "auto";
-testBtn.addEventListener("click", () => generateCoords());
