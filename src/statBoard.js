@@ -124,22 +124,40 @@ export default function statBoard() {
     resetBtn.disabled = true;
     ps.publish("new-game");
   });
+
   yesBtn.addEventListener("click", () => {
     console.log("Yes, vsing CPU.");
-    // hideModeDiv()
-    // showPlayerScoreDiv()
+
+    // Switch button disabled states
+    ps.publish("cpu-on");
+    topPlayerName = "CPU";
+    botPlayerName = "Player";
+    hideModeDiv();
+    resetScores();
+    showPlayerScoreDiv();
+
+    yesBtn.disabled = true;
+    noBtn.disabled = true;
+    startBtn.disabled = false;
+    resetBtn.disabled = false;
   });
+
   noBtn.addEventListener("click", () => {
     console.log("No, vsing human.");
 
     // Switch button disabled states
+    ps.publish("cpu-off");
+    topPlayerName = "Top Player";
+    botPlayerName = "Bottom Player";
     hideModeDiv();
+    resetScores();
     showPlayerScoreDiv();
     yesBtn.disabled = true;
     noBtn.disabled = true;
     startBtn.disabled = false;
     resetBtn.disabled = false;
   });
+
   resetBtn.addEventListener("click", () => {
     // Reset stats
     hidePlayerScoreDiv();
@@ -147,6 +165,7 @@ export default function statBoard() {
     resetScores();
 
     // Switch button disabled states
+    ps.publish("cpu-off");
     startBtn.disabled = true;
     resetBtn.disabled = true;
     yesBtn.disabled = false;

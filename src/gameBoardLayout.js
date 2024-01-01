@@ -6,6 +6,8 @@ export default function createBoard() {
   let topBoard = generateBoard("top");
   let botBoard = generateBoard("bot");
   let disableAllBoards = true;
+  let playerMoved = false;
+  let cpuActive = false;
 
   boardDiv.appendChild(topBoard);
   boardDiv.appendChild(botBoard);
@@ -56,9 +58,9 @@ export default function createBoard() {
 
   function updateBoard(obj) {
     // Update board elements
+
     const contentElem = document.getElementById(obj.elem);
     const boardElem = contentElem.getElementsByClassName("board")[0];
-
     function updateCoordinate(obj, x, y) {
       // Update coordinate with obj
       for (const node of boardElem.children) {
@@ -66,9 +68,15 @@ export default function createBoard() {
         const dataY = node.getAttribute("data-y");
 
         if (dataX == x && dataY == y) {
-          // append obj data to the squares with classes...
+          // Append obj data to the squares with classes
+
           if (obj.length) {
-            node.classList.add("ship");
+            // If AI active then hide top board ships
+            if (cpuActive && contentElem.id == "top") {
+              break;
+            } else {
+              node.classList.add("ship");
+            }
           }
           if (obj.status == "hit") {
             node.classList.add("hit");
@@ -94,6 +102,7 @@ export default function createBoard() {
   }
 
   function switchActiveBoard() {
+    // Switch active boards
     if (disableAllBoards) {
       return;
     }
@@ -106,6 +115,9 @@ export default function createBoard() {
         botBoard.style.pointerEvents = "none";
       }
     }
+
+    // If AI active then attack
+    cpuAttack();
   }
 
   function disableBoards() {
@@ -117,12 +129,11 @@ export default function createBoard() {
   }
 
   function resetBoard() {
-    // Get container of both boards
-
     // Clear both boards from container
     while (boardDiv.firstChild) {
       boardDiv.removeChild(boardDiv.lastChild);
     }
+
     topBoard = generateBoard("top");
     botBoard = generateBoard("bot");
 
@@ -130,11 +141,13 @@ export default function createBoard() {
     boardDiv.appendChild(botBoard);
   }
 
-  function startGame() {
-    disableAllBoards = false;
-    // clear board status and rebuild ships
-    resetBoard();
-    switchActiveBoard();
+  // AI Move
+  function cpuAttack() {
+    // Check if player has moved and AI mode active
+    if (cpuActive && playerMoved) {
+      playerMoved = false;
+      ps.publish("cpu-attack");
+    }
   }
 
   // Mouse events
@@ -145,9 +158,12 @@ export default function createBoard() {
       const dataY = Number(e.target.getAttribute("data-y"));
       const coordinates = { owner: "top", x: dataX, y: dataY };
 
+      // Player has moved (AI check)
+      playerMoved = true;
       ps.publish("attack-grid", coordinates);
     }
-    if (parentBoard.id == "bot") {
+    // Disable checking bot board if AI active
+    if (parentBoard.id == "bot" && cpuActive == false) {
       const dataX = Number(e.target.getAttribute("data-x"));
       const dataY = Number(e.target.getAttribute("data-y"));
       const coordinates = { owner: "bot", x: dataX, y: dataY };
@@ -156,9 +172,23 @@ export default function createBoard() {
     }
   });
 
+  function startGame() {
+    disableAllBoards = false;
+    playerMoved = false;
+    // clear board status and rebuild ships
+    resetBoard();
+    switchActiveBoard();
+  }
+
   disableBoards();
   ps.subscribe("update-board", updateBoard);
   ps.subscribe("update-board", switchActiveBoard);
   ps.subscribe("game-over", disableBoards);
   ps.subscribe("new-game", startGame);
+  ps.subscribe("cpu-on", () => {
+    cpuActive = true;
+  });
+  ps.subscribe("cpu-off", () => {
+    cpuActive = false;
+  });
 }

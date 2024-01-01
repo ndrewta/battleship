@@ -9,8 +9,10 @@ export default class GameBoard {
     this.sunkShips = 0;
     this.shipSet = new Set();
     this.totalShips = 0;
+    this.selectedMoves = [];
     ps.subscribe("attack-grid", (e) => this.receiveAttack(e));
     ps.subscribe("reset-values", () => this.resetValues());
+    ps.subscribe("cpu-attack", () => this.cpuAttack());
   }
 
   resetValues() {
@@ -25,6 +27,7 @@ export default class GameBoard {
     // Reset variables
     this.sunkShips = 0;
     this.totalShips = 0;
+    this.selectedMoves = [];
   }
 
   initGrid() {
@@ -37,11 +40,48 @@ export default class GameBoard {
     }
   }
 
+  generateCoords() {
+    // Generate coordinates
+    let numX = Math.floor(Math.random() * 10) + 1;
+    let numY = Math.floor(Math.random() * 10) + 1;
+    let absDifference = Math.abs(numX - numY);
+    let coordinates = [numX, numY];
+
+    while (absDifference > 4 || absDifference == 0) {
+      numX = Math.floor(Math.random() * 10) + 1;
+      numY = Math.floor(Math.random() * 10) + 1;
+      absDifference = Math.abs(numX - numY);
+    }
+
+    return coordinates;
+  }
+
   placeShipDown(ship, x, y) {
-    if (y > 10) {
-      console.log("placeshipdown error. y > 10");
+    // Generate coordinates if null
+    if ((x && y) == null) [x, y] = this.generateCoords();
+
+    // Check if y coordinate is out of bounds
+    if (y - ship.length + 1 <= 0) {
+      // Modify coordinate
+      y += Math.abs(y - ship.length);
+    }
+
+    // Check if another ship has occupied the square
+    let overlap = false;
+    for (let i = 0; i < ship.length; i++) {
+      if (this.grid[x][y - i].length) {
+        overlap = true;
+        break;
+      }
+    }
+
+    // If overlap then change x coordinate
+    if (overlap) {
+      const newX = Math.floor(Math.random() * 10) + 1;
+      this.placeShipDown(ship, newX, y);
       return;
     }
+
     // Place ship downwards
     for (let i = 0; i < ship.length; i++) {
       this.grid[x][y - i] = ship;
@@ -51,10 +91,31 @@ export default class GameBoard {
   }
 
   placeShipRight(ship, x, y) {
-    if (x > 10) {
-      console.log("placeshipright error. x > 10");
+    // Generate coordinates if null
+    if ((x && y) == null) [x, y] = this.generateCoords();
+
+    // Check if x coordinate is out of bounds
+    if (x + ship.length - 1 > 10) {
+      // Modify coordinate
+      x -= x + ship.length - 11;
+    }
+
+    // Check if another ship has occupied the square
+    let overlap = false;
+    for (let i = 0; i < ship.length; i++) {
+      if (this.grid[x + i][y].length) {
+        overlap = true;
+        break;
+      }
+    }
+
+    // If overlap then change x coordinate
+    if (overlap) {
+      const newY = Math.floor(Math.random() * 10) + 1;
+      this.placeShipRight(ship, x, newY);
       return;
     }
+
     // Place ship rightwards
     for (let i = 0; i < ship.length; i++) {
       this.grid[x + i][y] = ship;
@@ -109,10 +170,55 @@ export default class GameBoard {
   }
 
   updateGrid(elem) {
-    // console.log(this.owner, this.grid);
-
     // Publish updated grid values
     const obj = { owner: this.owner, grid: this.grid, elem };
     ps.publish("update-board", obj);
+  }
+
+  // AI logic
+  cpuMove(x = 10, y = 10) {
+    let move;
+    let decidedMove = false;
+
+    const randomCoord = () => {
+      // Generate random coordinates
+      const obj = { owner: "bot" };
+      const coordX = Math.floor(Math.random() * x) + 1;
+      const coordY = Math.floor(Math.random() * y) + 1;
+      obj.x = coordX;
+      obj.y = coordY;
+      return obj;
+    };
+
+    const checkMoves = (newMove) => {
+      // Check if coordinates have been selected previously
+      for (const move of this.selectedMoves) {
+        if (move.x === newMove.x && move.y === newMove.y) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    while (!decidedMove) {
+      // Exit loop if all moves exhausted
+      if (this.selectedMoves.length >= 100) {
+        return;
+      }
+      // Continue looping until a unique coordinate is found
+      move = randomCoord();
+      if (!checkMoves(move)) {
+        decidedMove = true;
+      }
+    }
+
+    this.selectedMoves.push(move);
+
+    return move;
+  }
+
+  cpuAttack() {
+    const move = this.cpuMove();
+    this.receiveAttack(move);
   }
 }
