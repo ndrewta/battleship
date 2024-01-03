@@ -11,66 +11,65 @@ statBoard();
 createLayout();
 
 // Create players
-let player = new Player("PLAYER 1");
-let cpu = new Player("CPU");
+let botPlayer = new Player("PLAYER 1");
+let topPlayer = new Player("PLAYER 2");
 
 // Gameboard setup
-let playerBoard = new GameBoard(player, "bot");
-let CPUBoard = new GameBoard(cpu, "top");
+let botPlayerBoard = new GameBoard(botPlayer, "bot");
+let topPlayerBoard = new GameBoard(topPlayer, "top");
 
-// Player ships
-let playerShip1 = new Ship();
-let playerShip2 = new Ship();
-let playerShip3 = new Ship();
-let playerShip4 = new Ship();
+// Bottom Player ships
+let botShip1 = new Ship();
+let botShip2 = new Ship();
+let botShip3 = new Ship();
+let botShip4 = new Ship();
 
-// CPU ships
-let CPUShip1 = new Ship();
-let CPUShip2 = new Ship();
-let CPUShip3 = new Ship();
-let CPUShip4 = new Ship();
+// Top player ships
+let topShip1 = new Ship();
+let topShip2 = new Ship();
+let topShip3 = new Ship();
+let topShip4 = new Ship();
 
 function newGame() {
-  // Player ships
-  playerShip1 = null;
-  playerShip2 = null;
-  playerShip3 = null;
-  playerShip4 = null;
+  // Bottom player ships
+  botShip1 = null;
+  botShip2 = null;
+  botShip3 = null;
+  botShip4 = null;
 
-  playerShip1 = new Ship(2);
-  playerShip2 = new Ship(3);
-  playerShip3 = new Ship(4);
-  playerShip4 = new Ship(4);
+  botShip1 = new Ship(2);
+  botShip2 = new Ship(3);
+  botShip3 = new Ship(4);
+  botShip4 = new Ship(4);
 
-  // CPU ships
-  CPUShip1 = null;
-  CPUShip2 = null;
-  CPUShip3 = null;
-  CPUShip4 = null;
+  // Top player ships
+  topShip1 = null;
+  topShip2 = null;
+  topShip3 = null;
+  topShip4 = null;
 
-  CPUShip1 = new Ship(2);
-  CPUShip2 = new Ship(3);
-  CPUShip3 = new Ship(4);
-  CPUShip4 = new Ship(4);
+  topShip1 = new Ship(2);
+  topShip2 = new Ship(3);
+  topShip3 = new Ship(4);
+  topShip4 = new Ship(4);
 
   ps.publish("reset-values");
 
   // Place player ships
-  playerBoard.placeShipDown(playerShip1);
-  playerBoard.placeShipDown(playerShip2);
-  playerBoard.placeShipRight(playerShip3);
-  playerBoard.placeShipRight(playerShip4);
+  botPlayerBoard.placeShipDown(botShip1);
+  botPlayerBoard.placeShipDown(botShip2);
+  botPlayerBoard.placeShipRight(botShip3);
+  botPlayerBoard.placeShipRight(botShip4);
 
   // Place CPU ships
-  CPUBoard.placeShipDown(CPUShip1);
-  CPUBoard.placeShipDown(CPUShip2);
-  CPUBoard.placeShipRight(CPUShip3);
-  CPUBoard.placeShipRight(CPUShip4);
+  topPlayerBoard.placeShipDown(topShip1);
+  topPlayerBoard.placeShipDown(topShip2);
+  topPlayerBoard.placeShipRight(topShip3);
+  topPlayerBoard.placeShipRight(topShip4);
 
   // Update both grids
-
-  playerBoard.updateGrid("bot");
-  CPUBoard.updateGrid("top");
+  botPlayerBoard.updateGrid("bot");
+  topPlayerBoard.updateGrid("top");
 }
 
 ps.subscribe("new-game", newGame);

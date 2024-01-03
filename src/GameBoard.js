@@ -147,8 +147,8 @@ export default class GameBoard {
     }
     // Update grid
     // Check player ships status
-    this.checkPlayerShips();
     this.updateGrid(owner);
+    this.checkPlayerShips();
   }
 
   checkPlayerShips() {
@@ -162,7 +162,6 @@ export default class GameBoard {
 
     // Check if number of sunk ships is equal to number of all ships on board
     if (this.sunkShips == this.totalShips) {
-      console.log(`${this.owner.name} lost!`);
       ps.publish("game-over", this.boardPosition);
       return true;
     }
