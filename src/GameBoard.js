@@ -147,8 +147,8 @@ export default class GameBoard {
     }
     // Update grid
     // Check player ships status
-    this.checkPlayerShips();
     this.updateGrid(owner);
+    this.checkPlayerShips();
   }
 
   checkPlayerShips() {
