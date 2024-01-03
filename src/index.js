@@ -63,9 +63,9 @@ function newGame() {
 
   // Place CPU ships
   CPUBoard.placeShipDown(CPUShip1);
-  CPUBoard.placeShipDown(CPUShip2);
-  CPUBoard.placeShipRight(CPUShip3);
-  CPUBoard.placeShipRight(CPUShip4);
+  // CPUBoard.placeShipDown(CPUShip2);
+  // CPUBoard.placeShipRight(CPUShip3);
+  // CPUBoard.placeShipRight(CPUShip4);
 
   // Update both grids
 

@@ -61,6 +61,7 @@ export default function createBoard() {
 
     const contentElem = document.getElementById(obj.elem);
     const boardElem = contentElem.getElementsByClassName("board")[0];
+
     function updateCoordinate(obj, x, y) {
       // Update coordinate with obj
       for (const node of boardElem.children) {
@@ -99,6 +100,46 @@ export default function createBoard() {
         // }
       }
     }
+
+    // Switch active board state
+    switchActiveBoard();
+  }
+
+  function switchHiddenBoard() {
+    // If pvp mode then hide ships on board
+    const topBoardShips = Array.from(topBoard.getElementsByClassName("ship"));
+    const botBoardShips = Array.from(botBoard.getElementsByClassName("ship"));
+    if (topBoard.style.pointerEvents == "none") {
+      topBoardShips.forEach((ship) => {
+        if (ship.classList.contains("hit")) {
+          ship.style.backgroundColor = "rgb(175, 129, 129)";
+        } else {
+          ship.style.backgroundColor = "rgb(97, 169, 202)";
+        }
+      });
+      botBoardShips.forEach((ship) => {
+        if (ship.classList.contains("hit")) {
+          ship.style.backgroundColor = "rgb(175, 129, 129)";
+        } else {
+          ship.style.backgroundColor = "white";
+        }
+      });
+    } else {
+      topBoardShips.forEach((ship) => {
+        if (ship.classList.contains("hit")) {
+          ship.style.backgroundColor = "rgb(175, 129, 129)";
+        } else {
+          ship.style.backgroundColor = "white";
+        }
+      });
+      botBoardShips.forEach((ship) => {
+        if (ship.classList.contains("hit")) {
+          ship.style.backgroundColor = "rgb(175, 129, 129)";
+        } else {
+          ship.style.backgroundColor = "rgb(97, 169, 202)";
+        }
+      });
+    }
   }
 
   function switchActiveBoard() {
@@ -115,6 +156,9 @@ export default function createBoard() {
         botBoard.style.pointerEvents = "none";
       }
     }
+
+    // If pvp mode enabled
+    switchHiddenBoard();
 
     // If AI active then attack
     cpuAttack();
@@ -182,9 +226,9 @@ export default function createBoard() {
 
   disableBoards();
   ps.subscribe("update-board", updateBoard);
-  ps.subscribe("update-board", switchActiveBoard);
   ps.subscribe("game-over", disableBoards);
   ps.subscribe("new-game", startGame);
+  ps.subscribe("clear-board", resetBoard);
   ps.subscribe("cpu-on", () => {
     cpuActive = true;
   });

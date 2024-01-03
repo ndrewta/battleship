@@ -166,6 +166,7 @@ export default function statBoard() {
 
     // Switch button disabled states
     ps.publish("cpu-off");
+    ps.publish("clear-board");
     startBtn.disabled = true;
     resetBtn.disabled = true;
     yesBtn.disabled = false;
