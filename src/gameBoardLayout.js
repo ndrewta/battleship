@@ -8,6 +8,8 @@ export default function createBoard() {
   let disableAllBoards = true;
   let playerMoved = false;
   let cpuActive = false;
+  let topBoardsTurn = false;
+  let botBoardsTurn = false;
 
   boardDiv.appendChild(topBoard);
   boardDiv.appendChild(botBoard);
@@ -106,9 +108,11 @@ export default function createBoard() {
   }
 
   function switchHiddenBoard() {
-    // If pvp mode then hide ships on board
+    // If pvp mode then hide ships on board, disable all input
     const topBoardShips = Array.from(topBoard.getElementsByClassName("ship"));
     const botBoardShips = Array.from(botBoard.getElementsByClassName("ship"));
+    topBoard.style.pointerEvents = "none";
+    botBoard.style.pointerEvents = "none";
 
     // Temp hide ships
     topBoardShips.forEach((ship) => {
@@ -125,10 +129,9 @@ export default function createBoard() {
         ship.style.backgroundColor = "rgb(175, 129, 129)";
       }
     });
-
     // Wait 2 seconds then display ship status
     setTimeout(() => {
-      if (topBoard.style.pointerEvents == "none") {
+      if (botBoardsTurn) {
         // Top board's turn
         topBoardShips.forEach((ship) => {
           if (!ship.classList.contains("hit")) {
@@ -140,7 +143,7 @@ export default function createBoard() {
             ship.style.backgroundColor = "white";
           }
         });
-      } else {
+      } else if (topBoardsTurn) {
         // Bottom board's turn
         topBoardShips.forEach((ship) => {
           if (!ship.classList.contains("hit")) {
@@ -153,34 +156,43 @@ export default function createBoard() {
           }
         });
       }
+      switchPlayerControl();
     }, 2000);
   }
 
+  function switchPlayerControl() {
+    // Switch player control
+    if (botBoardsTurn) {
+      // Top boards turn
+      topBoard.style.pointerEvents = "none";
+      botBoard.style.pointerEvents = "auto";
+      if (cpuActive) {
+        ps.publish("info-update", `CPU's turn`);
+      } else {
+        ps.publish("info-update", `Top Player's turn`);
+      }
+
+      // Set turn variables for next turn
+      topBoardsTurn = true;
+      botBoardsTurn = false;
+    } else if (topBoardsTurn) {
+      topBoard.style.pointerEvents = "auto";
+      botBoard.style.pointerEvents = "none";
+      if (cpuActive) {
+        ps.publish("info-update", `Your turn`);
+      } else {
+        ps.publish("info-update", `Bottom Player's turn`);
+      }
+
+      // Set turn variables for next turn
+      topBoardsTurn = false;
+      botBoardsTurn = true;
+    }
+  }
   function switchActiveBoard() {
     // Switch active boards
     if (disableAllBoards) {
       return;
-    }
-
-    // Switch player control
-    if (topBoard || botBoard) {
-      if (topBoard.style.pointerEvents == "auto") {
-        topBoard.style.pointerEvents = "none";
-        botBoard.style.pointerEvents = "auto";
-        if (cpuActive) {
-          ps.publish("info-update", `CPU's turn`);
-        } else {
-          ps.publish("info-update", `Top Player's turn`);
-        }
-      } else {
-        topBoard.style.pointerEvents = "auto";
-        botBoard.style.pointerEvents = "none";
-        if (cpuActive) {
-          ps.publish("info-update", `Your turn`);
-        } else {
-          ps.publish("info-update", `Bottom Player's turn`);
-        }
-      }
     }
 
     // If pvp mode enabled
@@ -189,10 +201,16 @@ export default function createBoard() {
     }
 
     // If AI active then attack
-    setTimeout(cpuAttack, 1000);
+    if (cpuActive) {
+      switchPlayerControl();
+      if (playerMoved && !disableAllBoards) {
+        setTimeout(cpuAttack, 800);
+      }
+    }
   }
 
   function disableBoards() {
+    // Game end
     disableAllBoards = true;
     if (topBoard || botBoard) {
       topBoard.style.pointerEvents = "none";
@@ -215,12 +233,9 @@ export default function createBoard() {
 
   // AI Move
   function cpuAttack() {
-    // Check if player has moved and AI mode active
-    if (cpuActive && playerMoved) {
-      playerMoved = false;
-
-      ps.publish("cpu-attack");
-    }
+    // Pass turn back to player and attack
+    playerMoved = false;
+    ps.publish("cpu-attack", "bot");
   }
 
   // Mouse events
@@ -248,9 +263,10 @@ export default function createBoard() {
   function startGame() {
     disableAllBoards = false;
     playerMoved = false;
+    topBoardsTurn = false;
+    botBoardsTurn = true;
     // clear board status and rebuild ships
     resetBoard();
-    switchActiveBoard();
   }
 
   disableBoards();
