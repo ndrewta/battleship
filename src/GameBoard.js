@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import ps from "./pubSub";
 
 export default class GameBoard {
@@ -9,10 +10,11 @@ export default class GameBoard {
     this.sunkShips = 0;
     this.shipSet = new Set();
     this.totalShips = 0;
-    this.selectedMoves = [];
+    this.selectedMoves = new Set();
+    this.adjacentCoord = new Set();
     ps.subscribe("attack-grid", (e) => this.receiveAttack(e));
     ps.subscribe("reset-values", () => this.resetValues());
-    ps.subscribe("cpu-attack", () => this.cpuAttack());
+    ps.subscribe("cpu-attack", (e) => this.cpuAttack(e));
   }
 
   resetValues() {
@@ -27,7 +29,10 @@ export default class GameBoard {
     // Reset variables
     this.sunkShips = 0;
     this.totalShips = 0;
-    this.selectedMoves = [];
+    this.selectedMoves = null;
+    this.selectedMoves = new Set();
+    this.adjacentCoord = null;
+    this.adjacentCoord = new Set();
   }
 
   initGrid() {
@@ -142,6 +147,8 @@ export default class GameBoard {
       this.grid[x][y].isSunk();
       const gridObj = { status: "hit" };
       this.grid[x][y] = gridObj;
+      // Add coordinate to checkAdjacentCoord for AI behaviour
+      this.adjacentCoord.add({ x: coord.x, y: coord.y });
     } else {
       this.grid[x][y].status = "miss";
     }
@@ -162,7 +169,6 @@ export default class GameBoard {
 
     // Check if number of sunk ships is equal to number of all ships on board
     if (this.sunkShips == this.totalShips) {
-      console.log(`${this.owner.name} lost!`);
       ps.publish("game-over", this.boardPosition);
       return true;
     }
@@ -177,8 +183,55 @@ export default class GameBoard {
 
   // AI logic
   cpuMove(x = 10, y = 10) {
-    let move;
+    let returnMove;
     let decidedMove = false;
+    let checkedAdjacentMoves = false;
+
+    // check adjacentcoord set with +-1 x,y.
+    // then cross check the coord with selectedmoves set
+    // if that adjacent coord isnt in selectedmoves then proceed.
+    // otherwise if they're all matched up in both sets
+    // continue to generate a random coord
+
+    const checkAdjacentCoord = () => {
+      // Check adjacent squares of previous hits
+      for (const coord of this.adjacentCoord) {
+        // Check if valid move
+        let tempCoord = { owner: "bot", x: coord.x, y: coord.y };
+
+        // Check if x is valid and is available
+        if (coord.x + 1 <= 10) {
+          tempCoord.x = coord.x + 1;
+          if (!checkMoves(tempCoord)) {
+            return tempCoord;
+          }
+        }
+
+        if (coord.x - 1 > 0) {
+          tempCoord.x = coord.x - 1;
+          if (!checkMoves(tempCoord)) {
+            return tempCoord;
+          }
+        }
+
+        // Reset tempCoord.x
+        tempCoord.x = coord.x;
+
+        if (coord.y + 1 <= 10) {
+          tempCoord.y = coord.y + 1;
+          if (!checkMoves(tempCoord)) {
+            return tempCoord;
+          }
+        }
+
+        if (coord.y - 1 > 0) {
+          tempCoord.y = coord.y - 1;
+          if (!checkMoves(tempCoord)) {
+            return tempCoord;
+          }
+        }
+      }
+    };
 
     const randomCoord = () => {
       // Generate random coordinates
@@ -200,25 +253,42 @@ export default class GameBoard {
       return false;
     };
 
+    if (this.selectedMoves.size >= 100) {
+      // If all squares have been filled then return
+      return;
+    }
+
     while (!decidedMove) {
+      let move;
       // Exit loop if all moves exhausted
-      if (this.selectedMoves.length >= 100) {
-        return;
+
+      // If adjacent move to previous move pool found then return
+      if (!checkedAdjacentMoves) {
+        checkedAdjacentMoves = true;
+        move = checkAdjacentCoord();
       }
+
       // Continue looping until a unique coordinate is found
-      move = randomCoord();
+      if (move == undefined) {
+        move = randomCoord();
+      }
+
       if (!checkMoves(move)) {
+        // If move has been found then return move
         decidedMove = true;
+        returnMove = move;
       }
     }
 
-    this.selectedMoves.push(move);
+    this.selectedMoves.add(returnMove);
 
-    return move;
+    return returnMove;
   }
 
-  cpuAttack() {
-    const move = this.cpuMove();
-    this.receiveAttack(move);
+  cpuAttack(boardCheck) {
+    if (this.boardPosition == boardCheck) {
+      const move = this.cpuMove();
+      this.receiveAttack(move);
+    }
   }
 }

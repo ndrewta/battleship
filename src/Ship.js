@@ -3,6 +3,9 @@ export default class Ship {
     this.length = length;
     this.hits = 0;
     this.sunk = false;
+    this.colour = `rgb(${(Math.random() * 256) | 0}, ${
+      (Math.random() * 256) | 0
+    }, ${(Math.random() * 256) | 0})`;
   }
 
   hit() {

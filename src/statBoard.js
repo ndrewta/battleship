@@ -14,6 +14,9 @@ export default function statBoard() {
   const playerContainer = document.createElement("div");
   playerContainer.setAttribute("id", "player-scores-div");
 
+  const playersDiv = document.createElement("div");
+  playersDiv.setAttribute("id", "players-div");
+
   const topPlayer = document.createElement("p");
   topPlayer.setAttribute("id", "top-player");
   topPlayer.textContent = `${topPlayerName}: ${topPlayerScore}`;
@@ -22,8 +25,9 @@ export default function statBoard() {
   botPlayer.setAttribute("id", "bot-player");
   botPlayer.textContent = `${botPlayerName}: ${botPlayerScore}`;
 
-  playerContainer.appendChild(topPlayer);
-  playerContainer.appendChild(botPlayer);
+  playersDiv.appendChild(topPlayer);
+  playersDiv.appendChild(botPlayer);
+  playerContainer.appendChild(playersDiv);
   container.appendChild(playerContainer);
 
   // Mode select container
@@ -31,8 +35,11 @@ export default function statBoard() {
   modeDiv.setAttribute("id", "mode-select-div");
 
   // Mode select question
+  const questionDiv = document.createElement("div");
+  questionDiv.setAttribute("id", "question-div");
   const questionText = document.createElement("p");
   questionText.textContent = "Verse CPU?";
+  questionDiv.appendChild(questionText);
 
   // Mode select buttons
   const btnContainer = document.createElement("div");
@@ -44,30 +51,49 @@ export default function statBoard() {
   noBtn.setAttribute("id", "no-btn");
   noBtn.textContent = "No";
 
-  modeDiv.appendChild(questionText);
+  modeDiv.appendChild(questionDiv);
   btnContainer.appendChild(yesBtn);
   btnContainer.appendChild(noBtn);
   modeDiv.appendChild(btnContainer);
   container.appendChild(modeDiv);
 
-  // Container buttons
-  const containerBtns = document.createElement("div");
-  containerBtns.setAttribute("id", "container-btns");
-  playerContainer.appendChild(containerBtns);
+  // Player container buttons
+  const playerContainerBtns = document.createElement("div");
+  playerContainerBtns.setAttribute("id", "player-container-btns");
+  playerContainer.appendChild(playerContainerBtns);
 
   // Start button
   const startBtn = document.createElement("button");
-  startBtn.textContent = "Start Game";
+  startBtn.textContent = "New Game";
   startBtn.setAttribute("id", "start-btn");
   startBtn.disabled = true;
-  containerBtns.appendChild(startBtn);
+  playerContainerBtns.appendChild(startBtn);
 
   // Reset button
   const resetBtn = document.createElement("button");
   resetBtn.setAttribute("id", "reset-btn");
   resetBtn.textContent = "Reset";
-  resetBtn.disabled = true;
-  containerBtns.appendChild(resetBtn);
+  playerContainerBtns.appendChild(resetBtn);
+
+  // Turn/victory notification
+  const infoDiv = document.createElement("div");
+  infoDiv.setAttribute("id", "info-div");
+  playerContainer.appendChild(infoDiv);
+
+  const infoText = document.createElement("p");
+  infoText.textContent = "";
+  infoDiv.appendChild(infoText);
+
+  function updateInfoText(text) {
+    // Loser Board info
+    if (text == "top") {
+      infoText.textContent = `${botPlayerName} won!`;
+    } else if (text == "bot") {
+      infoText.textContent = `${topPlayerName} won!`;
+    } else {
+      infoText.textContent = text;
+    }
+  }
 
   function updateScores(loserBoard) {
     // Update scores
@@ -79,6 +105,7 @@ export default function statBoard() {
       topPlayer.textContent = `${topPlayerName}: ${topPlayerScore}`;
     }
   }
+
   function resetScores() {
     // Reset scores and update board
     topPlayerScore = 0;
@@ -90,10 +117,10 @@ export default function statBoard() {
 
   function enableBtns() {
     startBtn.disabled = false;
-    resetBtn.disabled = false;
   }
 
   function gameOverCleanUp(loserBoard) {
+    updateInfoText(loserBoard);
     updateScores(loserBoard);
     enableBtns();
   }
@@ -121,13 +148,10 @@ export default function statBoard() {
   // Event listeners
   startBtn.addEventListener("click", () => {
     startBtn.disabled = true;
-    resetBtn.disabled = true;
     ps.publish("new-game");
   });
 
   yesBtn.addEventListener("click", () => {
-    console.log("Yes, vsing CPU.");
-
     // Switch button disabled states
     ps.publish("cpu-on");
     topPlayerName = "CPU";
@@ -139,12 +163,9 @@ export default function statBoard() {
     yesBtn.disabled = true;
     noBtn.disabled = true;
     startBtn.disabled = false;
-    resetBtn.disabled = false;
   });
 
   noBtn.addEventListener("click", () => {
-    console.log("No, vsing human.");
-
     // Switch button disabled states
     ps.publish("cpu-off");
     topPlayerName = "Top Player";
@@ -155,7 +176,6 @@ export default function statBoard() {
     yesBtn.disabled = true;
     noBtn.disabled = true;
     startBtn.disabled = false;
-    resetBtn.disabled = false;
   });
 
   resetBtn.addEventListener("click", () => {
@@ -167,14 +187,15 @@ export default function statBoard() {
     // Switch button disabled states
     ps.publish("cpu-off");
     ps.publish("clear-board");
+    infoText.textContent = "";
     startBtn.disabled = true;
-    resetBtn.disabled = true;
     yesBtn.disabled = false;
     noBtn.disabled = false;
   });
 
   // Pubsub
   ps.subscribe("game-over", gameOverCleanUp);
+  ps.subscribe("info-update", updateInfoText);
 
   // Hide player score div on init
   hidePlayerScoreDiv();
