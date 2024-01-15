@@ -79,10 +79,13 @@ export default function createBoard() {
               break;
             } else {
               node.classList.add("ship");
+              node.setAttribute("colour", obj.colour);
+              node.style.backgroundColor = obj.colour;
             }
           }
           if (obj.status == "hit") {
             node.classList.add("hit");
+            node.style.backgroundColor = "rgb(175, 129, 129)";
           }
           if (obj.status == "miss") {
             node.classList.add("miss");
@@ -134,8 +137,9 @@ export default function createBoard() {
       if (botBoardsTurn) {
         // Top board's turn
         topBoardShips.forEach((ship) => {
+          const shipColour = ship.getAttribute("colour");
           if (!ship.classList.contains("hit")) {
-            ship.style.backgroundColor = "rgb(97, 169, 202)";
+            ship.style.backgroundColor = shipColour;
           }
         });
         botBoardShips.forEach((ship) => {
@@ -151,11 +155,17 @@ export default function createBoard() {
           }
         });
         botBoardShips.forEach((ship) => {
+          const shipColour = ship.getAttribute("colour");
           if (!ship.classList.contains("hit")) {
-            ship.style.backgroundColor = "rgb(97, 169, 202)";
+            ship.style.backgroundColor = shipColour;
           }
         });
       }
+
+      if (disableAllBoards) {
+        return;
+      }
+
       switchPlayerControl();
     }, 2000);
   }
@@ -189,6 +199,7 @@ export default function createBoard() {
       botBoardsTurn = true;
     }
   }
+
   function switchActiveBoard() {
     // Switch active boards
     if (disableAllBoards) {
@@ -203,7 +214,7 @@ export default function createBoard() {
     // If AI active then attack
     if (cpuActive) {
       switchPlayerControl();
-      if (playerMoved && !disableAllBoards) {
+      if (playerMoved) {
         setTimeout(cpuAttack, 800);
       }
     }
@@ -212,10 +223,8 @@ export default function createBoard() {
   function disableBoards() {
     // Game end
     disableAllBoards = true;
-    if (topBoard || botBoard) {
-      topBoard.style.pointerEvents = "none";
-      botBoard.style.pointerEvents = "none";
-    }
+    topBoard.style.pointerEvents = "none";
+    botBoard.style.pointerEvents = "none";
   }
 
   function resetBoard() {
@@ -233,6 +242,11 @@ export default function createBoard() {
 
   // AI Move
   function cpuAttack() {
+    // Check if game has ended
+    if (disableAllBoards) {
+      return;
+    }
+
     // Pass turn back to player and attack
     playerMoved = false;
     ps.publish("cpu-attack", "bot");

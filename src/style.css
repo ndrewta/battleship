@@ -93,14 +93,6 @@ button {
   border: solid 1px;
 }
 
-.ship {
-  background-color: rgb(97, 169, 202);
-}
-
-.hit {
-  background-color: rgb(175, 129, 129);
-}
-
 .miss {
   background-color: rgb(41, 37, 37);
 }
